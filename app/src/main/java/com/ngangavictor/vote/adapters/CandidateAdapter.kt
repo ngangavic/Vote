@@ -8,10 +8,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.ngangavictor.vote.R
 import com.ngangavictor.vote.holders.CandidateHolder
+import com.ngangavictor.vote.listeners.PositionListener
 import com.ngangavictor.vote.models.CandidateModel
 import com.squareup.picasso.Picasso
 
-class CandidateAdapter(val candidateList: ArrayList<CandidateModel>, val context: Context) :
+class CandidateAdapter(val candidateList: ArrayList<CandidateModel>, val context: Context,val positionListener: PositionListener) :
     RecyclerView.Adapter<CandidateHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CandidateHolder {
         val layoutInflater =
@@ -24,11 +25,7 @@ class CandidateAdapter(val candidateList: ArrayList<CandidateModel>, val context
         holder.textViewFirstName.text = candidateList[position].fname+" "+candidateList[position].lname
         holder.textViewLastName.text = "for "+candidateList[position].name+" position"
         holder.buttonVote.setOnClickListener {
-            Snackbar.make(
-                ac.findViewById(android.R.id.content),
-                "Voting for" + candidateList[position].fname,
-                Snackbar.LENGTH_LONG
-            ).show()
+            positionListener.vote(candidateList[position].name,candidateList[position].id,candidateList[position].name,candidateList[position].position)
         }
         Picasso.get()
             .load("http://192.168.0.101/votesystem/images/" + candidateList[position].photo)

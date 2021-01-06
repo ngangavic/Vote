@@ -1,5 +1,6 @@
 package com.ngangavictor.vote
 
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -38,6 +39,8 @@ class VoteActivity : AppCompatActivity(),PositionListener {
 
     lateinit var candidateAdapter: CandidateAdapter
 
+    lateinit var sharedPrefs: SharedPrefs
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_vote)
@@ -47,6 +50,8 @@ class VoteActivity : AppCompatActivity(),PositionListener {
         positionList = ArrayList()
         candidateList = ArrayList()
 
+        sharedPrefs= SharedPrefs(this)
+
         binding.recyclerViewPositions.layoutManager = LinearLayoutManager(this)
         binding.recyclerViewPositions.setHasFixedSize(true)
 
@@ -54,6 +59,59 @@ class VoteActivity : AppCompatActivity(),PositionListener {
         binding.recyclerViewVote.setHasFixedSize(true)
 
         loadPositions()
+    }
+
+    override fun vote(candidateName: String, candidateId: String, postName:String, positionId: String){
+
+        val alertVote=AlertDialog.Builder(this)
+        alertVote.setCancelable(false)
+        alertVote.setTitle("Confirmation")
+        alertVote.setMessage("Do you want to vote "+candidateName+" for "+postName+"?")
+        alertVote.setNegativeButton("No", DialogInterface.OnClickListener { dialog, which ->dialog.cancel()  })
+        alertVote.setPositiveButton("Ok", DialogInterface.OnClickListener { dialog, which ->
+            val voteRequest=object :StringRequest(Method.POST,Utils.vote,
+                {response->
+                    alert.cancel()
+                    val jsonResponse=JSONObject(response)
+                    when(jsonResponse.getString("report")){
+                        "0"->{
+                            Snackbar.make(
+                                findViewById(android.R.id.content),
+                                jsonResponse.getString("message"),
+                                Snackbar.LENGTH_LONG
+                            ).show()
+                        }
+                        "1"->{
+                            Snackbar.make(
+                                findViewById(android.R.id.content),
+                                jsonResponse.getString("message"),
+                                Snackbar.LENGTH_LONG
+                            ).show()
+                        }
+                    }
+                },
+                {
+                    alert.cancel()
+                    Snackbar.make(
+                        findViewById(android.R.id.content),
+                        "Error!, Try again",
+                        Snackbar.LENGTH_LONG
+                    ).show()
+                }){
+                override fun getParams(): MutableMap<String, String> {
+                    val param = HashMap<String, String>()
+                    param["candidate_id"] = candidateId
+                    param["position_id"] = positionId
+                    param["voter_id"] = sharedPrefs.readPref("voter_id")
+                    return param
+                }
+            }
+
+            queue.add(voteRequest)
+        })
+
+        alert=alertVote.create()
+        alertVote.show()
     }
 
     override fun loadCandidates(position: String, name: String) {
@@ -77,7 +135,7 @@ class VoteActivity : AppCompatActivity(),PositionListener {
                         }
 
                         candidateAdapter=
-                            CandidateAdapter(candidateList as ArrayList<CandidateModel>,this)
+                            CandidateAdapter(candidateList as ArrayList<CandidateModel>,this,this)
                         binding.recyclerViewVote.adapter=candidateAdapter
                         binding.recyclerViewVote.visibility=View.VISIBLE
                         binding.recyclerViewPositions.visibility=View.GONE

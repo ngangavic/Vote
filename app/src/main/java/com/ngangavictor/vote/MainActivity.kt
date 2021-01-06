@@ -25,12 +25,15 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var alert: AlertDialog
 
+    lateinit var sharedPrefs: SharedPrefs
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding= DataBindingUtil.setContentView(this, R.layout.activity_main)
         supportActionBar?.hide()
 
         queue= Volley.newRequestQueue(this)
+        sharedPrefs= SharedPrefs(this)
 
         binding.buttonLogin.setOnClickListener {
             login()
@@ -57,9 +60,10 @@ class MainActivity : AppCompatActivity() {
 
                     when(jsonResponse.getString("report")){
                         "0"->{
+                            sharedPrefs.savePref("voter_id",jsonResponse.getString("message"))
                             startActivity(Intent(this,VoteActivity::class.java))
                             finish()
-                            Snackbar.make(findViewById(android.R.id.content),jsonResponse.getString("message"),Snackbar.LENGTH_LONG).show()
+//                            Snackbar.make(findViewById(android.R.id.content),jsonResponse.getString("message"),Snackbar.LENGTH_LONG).show()
                         }
                         "1"->{
                             Snackbar.make(findViewById(android.R.id.content),jsonResponse.getString("message"),Snackbar.LENGTH_LONG).show()
