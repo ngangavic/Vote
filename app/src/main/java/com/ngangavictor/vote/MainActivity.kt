@@ -3,6 +3,8 @@ package com.ngangavictor.vote
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
+import android.view.LayoutInflater
+import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.StringRequest
@@ -19,6 +21,8 @@ class MainActivity : AppCompatActivity() {
     lateinit var binding:ActivityMainBinding
 
     lateinit var queue: RequestQueue
+
+    lateinit var alert: AlertDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,8 +48,10 @@ class MainActivity : AppCompatActivity() {
             binding.editTextPassword.error="Required"
         }else{
             //login request
+                loadAlert()
             val loginRequest=object : StringRequest(Method.POST,Utils.login,
                 {response->
+                    alert.cancel()
                     val jsonResponse=JSONObject(response)
 
                     when(jsonResponse.getString("report")){
@@ -58,6 +64,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 },
                 {
+                    alert.cancel()
                     Snackbar.make(findViewById(android.R.id.content),"Error!, Try again",Snackbar.LENGTH_LONG).show()
                 }){
                 override fun getParams(): MutableMap<String, String> {
@@ -71,5 +78,13 @@ class MainActivity : AppCompatActivity() {
 
         }
 
+    }
+
+    private fun loadAlert(){
+        val layout=layoutInflater.inflate(R.layout.alert_loading,null)
+        val alertDialog=AlertDialog.Builder(this)
+        alertDialog.setView(layout)
+        alert=alertDialog.create()
+        alert.show()
     }
 }
