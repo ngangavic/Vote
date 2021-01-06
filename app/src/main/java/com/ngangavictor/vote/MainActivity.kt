@@ -1,5 +1,6 @@
 package com.ngangavictor.vote
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
@@ -56,6 +57,8 @@ class MainActivity : AppCompatActivity() {
 
                     when(jsonResponse.getString("report")){
                         "0"->{
+                            startActivity(Intent(this,VoteActivity::class.java))
+                            finish()
                             Snackbar.make(findViewById(android.R.id.content),jsonResponse.getString("message"),Snackbar.LENGTH_LONG).show()
                         }
                         "1"->{

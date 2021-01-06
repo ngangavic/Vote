@@ -5,15 +5,27 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.databinding.DataBindingUtil
+import com.android.volley.RequestQueue
+import com.android.volley.toolbox.Volley
 import com.ngangavictor.vote.databinding.ActivityMainBinding
+import com.ngangavictor.vote.databinding.ActivityVoteBinding
 
 class VoteActivity : AppCompatActivity() {
 
+    lateinit var binding: ActivityVoteBinding
+
+    lateinit var queue: RequestQueue
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_vote)
+        binding=DataBindingUtil.setContentView(this,R.layout.activity_vote)
+
+        queue=Volley.newRequestQueue(this)
     }
+
+
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.main_menu,menu)
