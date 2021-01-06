@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/action_application"
+        android:title="Application" />
+    <item
+        android:id="@+id/action_vote"
+        android:title="Vote" />
+    <item
+        android:id="@+id/action_view_results"
+        android:title="View Results" />
+    <item
+        android:id="@+id/action_logout"
+        android:title="Logout" />
+</menu>
