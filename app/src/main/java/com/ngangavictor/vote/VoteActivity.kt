@@ -6,6 +6,9 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.Spinner
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -41,6 +44,10 @@ class VoteActivity : AppCompatActivity(),PositionListener {
 
     lateinit var sharedPrefs: SharedPrefs
 
+    lateinit var spinnerPositionList: MutableList<String>
+
+    lateinit var spinnerPositionAdapter: ArrayAdapter<String>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_vote)
@@ -49,6 +56,7 @@ class VoteActivity : AppCompatActivity(),PositionListener {
         queue = Volley.newRequestQueue(this)
         positionList = ArrayList()
         candidateList = ArrayList()
+        spinnerPositionList=ArrayList()
 
         sharedPrefs= SharedPrefs(this)
 
@@ -59,6 +67,57 @@ class VoteActivity : AppCompatActivity(),PositionListener {
         binding.recyclerViewVote.setHasFixedSize(true)
 
         loadPositions()
+    }
+
+    private fun positionApplication(){
+        val layout=layoutInflater.inflate(R.layout.dialog_application,null)
+        val spinnerPosition=layout.findViewById<Spinner>(R.id.spinnerPosition)
+        val populateSpinnerRequest = StringRequest(
+            Request.Method.POST,Utils.getPositions,
+            { response ->
+                val jsonResponse = JSONObject(response)
+                when (jsonResponse.getString("report")) {
+                    "0" -> {
+                        val jsonArray = jsonResponse.getJSONArray("message")
+
+                        for (i in 0 until jsonArray.length()) {
+                            spinnerPositionList.add(jsonArray.getJSONObject(i).getString("position"))
+                        }
+                        spinnerPositionAdapter =
+                            ArrayAdapter(this, android.R.layout.simple_spinner_item, spinnerPositionList)
+                        spinnerPositionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                        spinnerPosition.adapter = spinnerPositionAdapter
+
+                    }
+                    "1" -> {
+                       alert.cancel()
+                        Snackbar.make(
+                            findViewById(android.R.id.content),
+                            jsonResponse.getString("message"),
+                            Snackbar.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            },
+            { error ->
+                alert.cancel()
+                Snackbar.make(
+                    findViewById(android.R.id.content),
+                    "Error! Failed to get positions",
+                    Snackbar.LENGTH_LONG
+                ).show()
+            })
+
+        queue.add(populateSpinnerRequest)
+
+        val alertPositionApplication=AlertDialog.Builder(this)
+        alertPositionApplication.setCancelable(false)
+        alertPositionApplication.setView(layout)
+        layout.findViewById<Button>(R.id.buttonCancel).setOnClickListener { alert.cancel() }
+        layout.findViewById<Button>(R.id.buttonApply).setOnClickListener {  }
+
+        alert=alertPositionApplication.create()
+        alert.show()
     }
 
     override fun vote(candidateName: String, candidateId: String, postName:String, positionId: String){
@@ -228,7 +287,7 @@ class VoteActivity : AppCompatActivity(),PositionListener {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_application -> {
-
+positionApplication()
             }
             R.id.action_vote -> {
                 startActivity(Intent(this, VoteActivity::class.java))
