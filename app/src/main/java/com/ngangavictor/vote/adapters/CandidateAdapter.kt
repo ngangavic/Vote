@@ -28,7 +28,7 @@ class CandidateAdapter(val candidateList: ArrayList<CandidateModel>, val context
             positionListener.vote(candidateList[position].name,candidateList[position].id,candidateList[position].name,candidateList[position].position)
         }
         Picasso.get()
-            .load("http://192.168.0.101/votesystem/images/" + candidateList[position].photo)
+            .load("http://jochebedscrib.org/ngangavictor/vote/images/" + candidateList[position].photo)
             .into(holder.imageViewProfile)
 
     }
